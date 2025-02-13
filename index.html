@@ -6,7 +6,7 @@
   <title>Chat</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
@@ -62,7 +62,7 @@
       if (message) {
         await addDoc(collection(db, currentChat), {
           text: message,
-          timestamp: new Date()
+          timestamp: serverTimestamp()
         });
         messageInput.value = "";
       }
@@ -88,6 +88,7 @@
           sendMessage();
         }
       });
+      document.getElementById("sendButton").addEventListener("click", sendMessage);
       switchChat("general");
     });
   </script>
@@ -152,7 +153,7 @@
     <div id="chat"></div>
     <div class="input-container">
       <input type="text" id="message" placeholder="Typ een bericht...">
-      <button onclick="sendMessage()">Verstuur</button>
+      <button id="sendButton">Verstuur</button>
     </div>
   </div>
 </body>
