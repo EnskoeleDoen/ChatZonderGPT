@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat</title>
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
       authDomain: "chat-zonder-gpt.firebaseapp.com",
@@ -19,11 +17,10 @@
       appId: "1:623791597770:web:139e3dbc4899b494c22c33"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Functie om bericht te verzenden
+    // Bericht verzenden
     async function sendMessage() {
       const message = document.getElementById('message').value;
       if (message) {
@@ -45,7 +42,9 @@
     onSnapshot(q, (snapshot) => {
       const chatDiv = document.getElementById('chat');
       chatDiv.innerHTML = ''; // Maak het chatvenster leeg
+
       snapshot.forEach((doc) => {
+        console.log("Bericht:", doc.data()); // Log de data om te controleren of je berichten ophaalt
         const msg = doc.data().text;
         const msgDiv = document.createElement('div');
         msgDiv.textContent = msg;
