@@ -47,6 +47,12 @@
       max-width: 90%;
     }
 
+    /* Afzender info */
+    .sender {
+      font-weight: bold;
+      color: #ff6347; /* Oranje voor de naam van de afzender */
+    }
+
     /* Invoerveld en knop */
     #message {
       width: calc(100% - 100px);
@@ -152,10 +158,13 @@
     // Bericht verzenden
     async function sendMessage() {
       const message = document.getElementById('message').value;
+      const sender = "Robin"; // Dit kan dynamisch worden aangepast op basis van wie de gebruiker is
+
       if (message) {
         try {
           await addDoc(collection(db, "messages"), {
             text: message,
+            sender: sender,
             timestamp: new Date()
           });
           document.getElementById('message').value = ''; // Leeg het inputveld
@@ -173,10 +182,16 @@
       chatDiv.innerHTML = ''; // Maak het chatvenster leeg
 
       snapshot.forEach((doc) => {
-        console.log("Bericht:", doc.data()); // Log de data om te controleren of je berichten ophaalt
         const msg = doc.data().text;
+        const sender = doc.data().sender;
+
         const msgDiv = document.createElement('div');
-        msgDiv.textContent = msg;
+        const senderSpan = document.createElement('span');
+        senderSpan.textContent = `${sender}: `;
+        senderSpan.classList.add('sender');
+        
+        msgDiv.appendChild(senderSpan);
+        msgDiv.appendChild(document.createTextNode(msg));
         chatDiv.appendChild(msgDiv);
       });
 
