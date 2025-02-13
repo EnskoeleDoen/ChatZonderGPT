@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
+      authDomain: "chat-zonder-gpt.firebaseapp.com",
+      projectId: "chat-zonder-gpt",
+      storageBucket: "chat-zonder-gpt.firebasestorage.app",
+      messagingSenderId: "623791597770",
+      appId: "1:623791597770:web:139e3dbc4899b494c22c33"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Functie om bericht te verzenden
+    async function sendMessage() {
+      const message = document.getElementById('message').value;
+      if (message) {
+        try {
+          await addDoc(collection(db, "messages"), {
+            text: message,
+            timestamp: new Date()
+          });
+          document.getElementById('message').value = ''; // Leeg het inputveld
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
+      }
+    }
+
+    // Berichten ophalen en weergeven
+    const q = query(collection(db, "messages"), orderBy("timestamp"));
+
+    onSnapshot(q, (snapshot) => {
+      const chatDiv = document.getElementById('chat');
+      chatDiv.innerHTML = ''; // Maak het chatvenster leeg
+      snapshot.forEach((doc) => {
+        const msg = doc.data().text;
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = msg;
+        chatDiv.appendChild(msgDiv);
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Chat</h1>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="Typ een bericht...">
+  <button onclick="sendMessage()">Verstuur</button>
+</body>
+</html>
