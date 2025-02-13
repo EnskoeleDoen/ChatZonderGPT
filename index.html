@@ -31,7 +31,7 @@
       padding: 15px;
       border-radius: 12px;
       background-color: #2c2f36; /* Donkere achtergrond voor chat */
-      height: 400px;
+      height: 500px; /* Vaste hoogte voor chatsectie */
       overflow-y: auto;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
       font-size: 16px;
@@ -225,6 +225,14 @@
     // Event listener voor de knop
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('sendButton').addEventListener('click', sendMessage);
+
+      // Event listener voor de Enter-toets
+      document.getElementById('message').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          sendMessage();
+          event.preventDefault(); // Voorkomt dat een nieuwe regel wordt toegevoegd bij Enter
+        }
+      });
     });
   </script>
 
