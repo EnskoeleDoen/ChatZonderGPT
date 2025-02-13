@@ -51,12 +51,17 @@
         chatDiv.appendChild(msgDiv);
       });
     });
+
+    // Event listener voor de knop
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('sendButton').addEventListener('click', sendMessage);
+    });
   </script>
 </head>
 <body>
   <h1>Chat</h1>
   <div id="chat"></div>
   <input type="text" id="message" placeholder="Typ een bericht...">
-  <button onclick="sendMessage()">Verstuur</button>
+  <button id="sendButton">Verstuur</button>
 </body>
 </html>
