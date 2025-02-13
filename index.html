@@ -5,236 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat</title>
   <style>
-    /* Algemene stijlen */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #181818; /* Diep donkergrijze achtergrond */
-      color: #e0e0e0; /* Lichte tekstkleur */
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      height: 100vh;
-    }
-
-    h1 {
-      text-align: center;
-      color: #ff6347; /* Oranje titel */
-      margin-top: 20px;
-    }
-
-    /* Chatvenster */
-    #chat {
-      max-width: 700px;
-      margin: 20px auto;
-      padding: 15px;
-      border-radius: 12px;
-      background-color: #2c2f36; /* Donkere achtergrond voor chat */
-      height: 500px; /* Vaste hoogte voor chatsectie */
-      overflow-y: auto;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
-      font-size: 16px;
-    }
-
-    /* Chatbericht */
-    #chat div {
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 10px;
-      background-color: #444;
-      color: #e0e0e0;
-      max-width: 90%;
-    }
-
-    /* Afzender info */
-    .sender {
-      font-weight: bold;
-    }
-
-    /* Gebruiker 1 */
-    .user1 {
-      color: #ff6347; /* Oranje voor Gebruiker 1 */
-    }
-
-    /* Gebruiker 2 */
-    .user2 {
-      color: #48C9B0; /* Groen voor Gebruiker 2 */
-    }
-
-    /* Invoerveld en knop */
-    #message {
-      width: calc(100% - 100px);
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #444;
-      border-radius: 10px;
-      margin: 10px 10px 10px 0;
-      background-color: #333;
-      color: #fff;
-    }
-
-    #sendButton {
-      width: 90px;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background-color: #ff6347;
+      font-family: Arial, sans-serif;
+      background-color: #181818;
       color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      text-align: center;
     }
-
-    #sendButton:hover {
-      background-color: #ff4500;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+    #chat-container {
+      max-width: 600px;
+      margin: auto;
+      background: #2c2f36;
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
     }
-
-    /* Flexbox voor het uitlijnen van het invoerveld en knop */
+    #chat {
+      height: 400px;
+      overflow-y: auto;
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+    }
     .input-container {
       display: flex;
-      justify-content: space-between;
-      max-width: 700px;
-      margin: 0 auto;
+      margin-top: 10px;
+    }
+    input {
+      flex: 1;
       padding: 10px;
+      border: none;
+      border-radius: 5px;
     }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      margin-top: 20px;
-      color: #999;
-      font-size: 12px;
+    button {
+      padding: 10px;
+      background: #ff6347;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
     }
-
-    /* Responsief voor mobiele apparaten */
-    @media (max-width: 768px) {
-      #chat {
-        max-width: 90%;
-        height: 350px;
-      }
-
-      .input-container {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      #message {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      #sendButton {
-        width: 100%;
-      }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-
   <h1>Chat</h1>
-
-  <!-- Chatgeschiedenis -->
-  <div id="chat"></div>
-
-  <!-- Invoerveld en versturen knop -->
-  <div class="input-container">
-    <input type="text" id="message" placeholder="Typ een bericht...">
-    <button id="sendButton">Verstuur</button>
+  <button onclick="switchChat('general')">Algemeen</button>
+  <button onclick="showPrivateChat()">Privé</button>
+  
+  <div id="password-container" class="hidden">
+    <p>Voer wachtwoord in:</p>
+    <input type="password" id="password">
+    <button onclick="validatePassword()">Enter</button>
+  </div>
+  
+  <div id="chat-container">
+    <h2 id="chat-title"></h2>
+    <div id="chat"></div>
+    <div class="input-container">
+      <input type="text" id="message" placeholder="Typ een bericht...">
+      <button onclick="sendMessage()">Verstuur</button>
+    </div>
   </div>
 
-  <footer>
-    <p>&copy; 2025 Chat App | Made by Robin</p>
-  </footer>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
-      authDomain: "chat-zonder-gpt.firebaseapp.com",
-      projectId: "chat-zonder-gpt",
-      storageBucket: "chat-zonder-gpt.firebasestorage.app",
-      messagingSenderId: "623791597770",
-      appId: "1:623791597770:web:139e3dbc4899b494c22c33"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Stel de gebruikers in
-    const user1 = "Gebruiker 1";
-    const user2 = "Gebruiker 2";
+  <script>
+    let currentChat = "";
+    const correctPassword = "blablabla";
+    let privateChatUnlocked = false;
     
-    // Bepaal de afzender (voor nu hardcoded als Gebruiker 1 of Gebruiker 2)
-    let currentUser = user1; // Je kunt dit later aanpassen afhankelijk van de gebruiker
-
-    // Bericht verzenden
-    async function sendMessage() {
-      const message = document.getElementById('message').value;
-      const sender = currentUser; // De huidige gebruiker
-
-      if (message) {
-        try {
-          await addDoc(collection(db, "messages"), {
-            text: message,
-            sender: sender,
-            timestamp: new Date()
-          });
-          document.getElementById('message').value = ''; // Leeg het inputveld
-        } catch (e) {
-          console.error("Error adding document: ", e);
-        }
+    function switchChat(chatName) {
+      if (chatName === "private" && !privateChatUnlocked) {
+        document.getElementById("password-container").classList.remove("hidden");
+        document.getElementById("chat-container").style.display = "none";
+        return;
+      }
+      document.getElementById("password-container").classList.add("hidden");
+      currentChat = chatName;
+      document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
+      document.getElementById("chat-container").style.display = "block";
+      loadChat();
+    }
+    
+    function showPrivateChat() {
+      if (privateChatUnlocked) {
+        switchChat("private");
+      } else {
+        document.getElementById("password-container").classList.remove("hidden");
+        document.getElementById("chat-container").style.display = "none";
       }
     }
-
-    // Berichten ophalen en weergeven
-    const q = query(collection(db, "messages"), orderBy("timestamp"));
-
-    onSnapshot(q, (snapshot) => {
-      const chatDiv = document.getElementById('chat');
-      chatDiv.innerHTML = ''; // Maak het chatvenster leeg
-
-      snapshot.forEach((doc) => {
-        const msg = doc.data().text;
-        const sender = doc.data().sender;
-
-        const msgDiv = document.createElement('div');
-        const senderSpan = document.createElement('span');
-
-        // Voeg de juiste kleur toe voor de afzender
-        if (sender === user1) {
-          senderSpan.textContent = `Gebruiker 1: `;
-          senderSpan.classList.add('user1');
-        } else if (sender === user2) {
-          senderSpan.textContent = `Gebruiker 2: `;
-          senderSpan.classList.add('user2');
-        }
-        
-        msgDiv.appendChild(senderSpan);
-        msgDiv.appendChild(document.createTextNode(msg));
-        chatDiv.appendChild(msgDiv);
-      });
-
-      // Scroll naar het laatste bericht
-      chatDiv.scrollTop = chatDiv.scrollHeight;
-    });
-
-    // Event listener voor de knop
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('sendButton').addEventListener('click', sendMessage);
-
-      // Event listener voor de Enter-toets
-      document.getElementById('message').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          sendMessage();
-          event.preventDefault(); // Voorkomt dat een nieuwe regel wordt toegevoegd bij Enter
-        }
-      });
-    });
+    
+    function validatePassword() {
+      const input = document.getElementById("password").value;
+      if (input === correctPassword) {
+        privateChatUnlocked = true;
+        switchChat("private");
+      } else {
+        alert("Fout wachtwoord!");
+      }
+    }
+    
+    function sendMessage() {
+      const messageInput = document.getElementById("message");
+      const message = messageInput.value;
+      if (message) {
+        localStorage.setItem(currentChat, (localStorage.getItem(currentChat) || "") + `\n${message}`);
+        messageInput.value = "";
+        loadChat();
+      }
+    }
+    
+    function loadChat() {
+      document.getElementById("chat").innerText = localStorage.getItem(currentChat) || "Nog geen berichten.";
+    }
   </script>
-
 </body>
 </html>
