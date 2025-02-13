@@ -30,6 +30,9 @@
         document.getElementById("chat-container").style.display = "none";
         return;
       }
+      if (chatName === "general") {
+        privateChatUnlocked = false;
+      }
       document.getElementById("password-container").classList.add("hidden");
       currentChat = chatName;
       document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
