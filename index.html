@@ -37,15 +37,6 @@
       loadChat();
     }
 
-    function showPrivateChat() {
-      if (privateChatUnlocked) {
-        switchChat("private");
-      } else {
-        document.getElementById("password-container").classList.remove("hidden");
-        document.getElementById("chat-container").style.display = "none";
-      }
-    }
-
     function validatePassword() {
       const input = document.getElementById("password").value;
       if (input === correctPassword) {
@@ -89,6 +80,7 @@
         }
       });
       document.getElementById("sendButton").addEventListener("click", sendMessage);
+      document.getElementById("privateChatButton").addEventListener("click", validatePassword);
       switchChat("general");
     });
   </script>
@@ -140,12 +132,12 @@
 <body>
   <h1>Chat</h1>
   <button onclick="switchChat('general')">Algemeen</button>
-  <button onclick="showPrivateChat()">Privé</button>
+  <button onclick="document.getElementById('password-container').classList.remove('hidden')">Privé</button>
   
   <div id="password-container" class="hidden">
     <p>Voer wachtwoord in:</p>
     <input type="password" id="password">
-    <button onclick="validatePassword()">Enter</button>
+    <button id="privateChatButton">Enter</button>
   </div>
   
   <div id="chat-container">
