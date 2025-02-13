@@ -155,10 +155,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Verkrijg de naam van het apparaat of browser
+    const deviceName = navigator.userAgent || "Onbekend gebruiker";
+
     // Bericht verzenden
     async function sendMessage() {
       const message = document.getElementById('message').value;
-      const sender = "Robin"; // Dit kan dynamisch worden aangepast op basis van wie de gebruiker is
+      const sender = deviceName; // Gebruik de naam van het apparaat of browser als afzender
 
       if (message) {
         try {
