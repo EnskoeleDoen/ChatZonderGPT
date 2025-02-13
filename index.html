@@ -4,6 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
+      authDomain: "chat-zonder-gpt.firebaseapp.com",
+      projectId: "chat-zonder-gpt",
+      storageBucket: "chat-zonder-gpt.firebasestorage.app",
+      messagingSenderId: "623791597770",
+      appId: "1:623791597770:web:139e3dbc4899b494c22c33"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentChat = "general";
+    const correctPassword = "blablabla";
+    let privateChatUnlocked = false;
+
+    function switchChat(chatName) {
+      if (chatName === "private" && !privateChatUnlocked) {
+        document.getElementById("password-container").classList.remove("hidden");
+        document.getElementById("chat-container").style.display = "none";
+        return;
+      }
+      document.getElementById("password-container").classList.add("hidden");
+      currentChat = chatName;
+      document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
+      document.getElementById("chat-container").style.display = "block";
+      loadChat();
+    }
+
+    function showPrivateChat() {
+      if (privateChatUnlocked) {
+        switchChat("private");
+      } else {
+        document.getElementById("password-container").classList.remove("hidden");
+        document.getElementById("chat-container").style.display = "none";
+      }
+    }
+
+    function validatePassword() {
+      const input = document.getElementById("password").value;
+      if (input === correctPassword) {
+        privateChatUnlocked = true;
+        switchChat("private");
+      } else {
+        alert("Fout wachtwoord!");
+      }
+    }
+
+    async function sendMessage() {
+      const messageInput = document.getElementById("message");
+      const message = messageInput.value.trim();
+      if (message) {
+        await addDoc(collection(db, currentChat), {
+          text: message,
+          timestamp: new Date()
+        });
+        messageInput.value = "";
+      }
+    }
+
+    function loadChat() {
+      const chatBox = document.getElementById("chat");
+      chatBox.innerHTML = "";
+      const q = query(collection(db, currentChat), orderBy("timestamp"));
+      onSnapshot(q, (snapshot) => {
+        chatBox.innerHTML = "";
+        snapshot.forEach((doc) => {
+          const msg = document.createElement("p");
+          msg.textContent = doc.data().text;
+          chatBox.appendChild(msg);
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("message").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+      switchChat("general");
+    });
+  </script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -68,57 +155,5 @@
       <button onclick="sendMessage()">Verstuur</button>
     </div>
   </div>
-
-  <script>
-    let currentChat = "";
-    const correctPassword = "blablabla";
-    let privateChatUnlocked = false;
-    
-    function switchChat(chatName) {
-      if (chatName === "private" && !privateChatUnlocked) {
-        document.getElementById("password-container").classList.remove("hidden");
-        document.getElementById("chat-container").style.display = "none";
-        return;
-      }
-      document.getElementById("password-container").classList.add("hidden");
-      currentChat = chatName;
-      document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
-      document.getElementById("chat-container").style.display = "block";
-      loadChat();
-    }
-    
-    function showPrivateChat() {
-      if (privateChatUnlocked) {
-        switchChat("private");
-      } else {
-        document.getElementById("password-container").classList.remove("hidden");
-        document.getElementById("chat-container").style.display = "none";
-      }
-    }
-    
-    function validatePassword() {
-      const input = document.getElementById("password").value;
-      if (input === correctPassword) {
-        privateChatUnlocked = true;
-        switchChat("private");
-      } else {
-        alert("Fout wachtwoord!");
-      }
-    }
-    
-    function sendMessage() {
-      const messageInput = document.getElementById("message");
-      const message = messageInput.value;
-      if (message) {
-        localStorage.setItem(currentChat, (localStorage.getItem(currentChat) || "") + `\n${message}`);
-        messageInput.value = "";
-        loadChat();
-      }
-    }
-    
-    function loadChat() {
-      document.getElementById("chat").innerText = localStorage.getItem(currentChat) || "Nog geen berichten.";
-    }
-  </script>
 </body>
 </html>
