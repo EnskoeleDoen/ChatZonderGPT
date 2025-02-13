@@ -50,7 +50,16 @@
     /* Afzender info */
     .sender {
       font-weight: bold;
-      color: #ff6347; /* Oranje voor de naam van de afzender */
+    }
+
+    /* Gebruiker 1 */
+    .user1 {
+      color: #ff6347; /* Oranje voor Gebruiker 1 */
+    }
+
+    /* Gebruiker 2 */
+    .user2 {
+      color: #48C9B0; /* Groen voor Gebruiker 2 */
     }
 
     /* Invoerveld en knop */
@@ -155,13 +164,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Verkrijg de naam van het apparaat of browser
-    const deviceName = navigator.userAgent || "Onbekend gebruiker";
+    // Stel de gebruikers in
+    const user1 = "Gebruiker 1";
+    const user2 = "Gebruiker 2";
+    
+    // Bepaal de afzender (voor nu hardcoded als Gebruiker 1 of Gebruiker 2)
+    let currentUser = user1; // Je kunt dit later aanpassen afhankelijk van de gebruiker
 
     // Bericht verzenden
     async function sendMessage() {
       const message = document.getElementById('message').value;
-      const sender = deviceName; // Gebruik de naam van het apparaat of browser als afzender
+      const sender = currentUser; // De huidige gebruiker
 
       if (message) {
         try {
@@ -190,8 +203,15 @@
 
         const msgDiv = document.createElement('div');
         const senderSpan = document.createElement('span');
-        senderSpan.textContent = `${sender}: `;
-        senderSpan.classList.add('sender');
+
+        // Voeg de juiste kleur toe voor de afzender
+        if (sender === user1) {
+          senderSpan.textContent = `Gebruiker 1: `;
+          senderSpan.classList.add('user1');
+        } else if (sender === user2) {
+          senderSpan.textContent = `Gebruiker 2: `;
+          senderSpan.classList.add('user2');
+        }
         
         msgDiv.appendChild(senderSpan);
         msgDiv.appendChild(document.createTextNode(msg));
