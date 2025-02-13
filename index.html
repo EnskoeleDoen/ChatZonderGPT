@@ -7,69 +7,80 @@
   <style>
     /* Algemene stijlen */
     body {
-      font-family: Arial, sans-serif;
-      background-color: #121212; /* Donkere achtergrond */
-      color: #fff; /* Witte tekstkleur */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #181818; /* Diep donkergrijze achtergrond */
+      color: #e0e0e0; /* Lichte tekstkleur */
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
     }
 
     h1 {
       text-align: center;
-      color: #ff6347; /* Oranje kleur voor de titel */
+      color: #ff6347; /* Oranje titel */
+      margin-top: 20px;
     }
 
     /* Chatvenster */
     #chat {
-      max-width: 600px;
+      max-width: 700px;
       margin: 20px auto;
       padding: 15px;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background-color: #333; /* Donkere achtergrond voor chatvenster */
+      border-radius: 12px;
+      background-color: #2c2f36; /* Donkere achtergrond voor chat */
       height: 400px;
       overflow-y: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+      font-size: 16px;
     }
 
     /* Chatbericht */
     #chat div {
-      padding: 8px;
-      margin: 5px 0;
-      border-radius: 5px;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
       background-color: #444;
-      color: #fff;
+      color: #e0e0e0;
+      max-width: 90%;
     }
 
     /* Invoerveld en knop */
     #message {
       width: calc(100% - 100px);
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      margin: 10px;
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin: 10px 10px 10px 0;
+      background-color: #333;
+      color: #fff;
     }
 
     #sendButton {
-      width: 80px;
-      padding: 10px;
+      width: 90px;
+      padding: 12px;
       font-size: 16px;
       border: none;
-      border-radius: 5px;
-      background-color: #ff6347; /* Oranje knopkleur */
+      border-radius: 10px;
+      background-color: #ff6347;
       color: white;
       cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     }
 
     #sendButton:hover {
-      background-color: #ff4500; /* Donkerder oranje bij hover */
+      background-color: #ff4500;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
     }
 
     /* Flexbox voor het uitlijnen van het invoerveld en knop */
     .input-container {
       display: flex;
       justify-content: space-between;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       padding: 10px;
     }
@@ -78,7 +89,30 @@
     footer {
       text-align: center;
       margin-top: 20px;
-      color: #ccc;
+      color: #999;
+      font-size: 12px;
+    }
+
+    /* Responsief voor mobiele apparaten */
+    @media (max-width: 768px) {
+      #chat {
+        max-width: 90%;
+        height: 350px;
+      }
+
+      .input-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #message {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      #sendButton {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -96,7 +130,7 @@
   </div>
 
   <footer>
-    <p>&copy; 2025 Chat App</p>
+    <p>&copy; 2025 Chat App | Made by Robin</p>
   </footer>
 
   <script type="module">
@@ -145,6 +179,9 @@
         msgDiv.textContent = msg;
         chatDiv.appendChild(msgDiv);
       });
+
+      // Scroll naar het laatste bericht
+      chatDiv.scrollTop = chatDiv.scrollHeight;
     });
 
     // Event listener voor de knop
@@ -152,5 +189,6 @@
       document.getElementById('sendButton').addEventListener('click', sendMessage);
     });
   </script>
+
 </body>
 </html>
