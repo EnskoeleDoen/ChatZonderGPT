@@ -23,20 +23,21 @@
     let currentChat = "general";
     const correctPassword = "blablabla";
     let privateChatUnlocked = false;
-    let unsubscribe; // snapshot listener
+    let unsubscribe = null;
 
     function switchChat(chatName) {
-      // Als de gebruiker naar privé wil, maar nog niet geauthentiseerd is
+      // Als je naar privé wilt, maar nog niet geauthentiseerd bent:
       if (chatName === "private" && !privateChatUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
         document.getElementById("chat-container").style.display = "none";
         return;
       }
-      // Als je overschakelt naar de algemene chat, zorg er dan voor dat de privéchat wordt vergrendeld
+      // Als je terug naar de algemene chat gaat, reset de privéstatus:
       if (chatName === "general") {
         privateChatUnlocked = false;
+        document.getElementById("password-container").classList.add("hidden");
       }
-      // Verberg de wachtwoordinvoer en maak deze leeg
+      // Zorg dat de wachtwoordinvoer verborgen is en leeg wordt gemaakt:
       document.getElementById("password-container").classList.add("hidden");
       document.getElementById("password").value = "";
       
@@ -71,7 +72,7 @@
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
-      // Stop vorige snapshot-luisteraar indien aanwezig
+      // Stop vorige snapshot-luisteraar als die bestaat
       if (unsubscribe) unsubscribe();
       const q = query(collection(db, currentChat), orderBy("timestamp"));
       unsubscribe = onSnapshot(q, (snapshot) => {
