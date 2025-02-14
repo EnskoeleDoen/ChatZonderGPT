@@ -30,25 +30,24 @@
     function switchChat(chatName) {
       if (chatName === "private" && !privateUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
-        document.getElementById("chat-container").style.display = "none";
+        document.getElementById("chat-wrapper").style.display = "none";
         return;
       }
       if (chatName === "general") {
         privateUnlocked = false;
         document.getElementById("password-container").classList.add("hidden");
       }
-      // Reset de wachtwoordinvoer
+      // Reset wachtwoordinvoer
       document.getElementById("password-container").classList.add("hidden");
       document.getElementById("password").value = "";
       
       currentChat = chatName;
-      // Geef in de titel duidelijk aan welke chat actief is.
       document.getElementById("chat-title").innerText = (chatName === "general") ? "Algemene Chat" : "Privé Chat";
-      document.getElementById("chat-container").style.display = "block";
+      document.getElementById("chat-wrapper").style.display = "flex";
       loadChat();
     }
 
-    // Valideer wachtwoordinvoer voor privéchat
+    // Valideer wachtwoord
     function validatePassword() {
       const input = document.getElementById("password").value;
       if (input === correctPassword) {
@@ -60,7 +59,7 @@
       }
     }
 
-    // Verzend een bericht naar de huidige chat
+    // Verzend bericht
     async function sendMessage() {
       const messageInput = document.getElementById("message");
       const message = messageInput.value.trim();
@@ -73,7 +72,7 @@
       }
     }
 
-    // Laad chatberichten via een snapshot-luisteraar
+    // Laad chatberichten
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
@@ -129,14 +128,32 @@
       border-radius: 5px;
       font-weight: bold;
     }
-    #chat-container {
-      max-width: 600px;
+    /* Wrapper voor de chat en desktop-logo's */
+    #chat-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 20px auto;
+      max-width: 800px;
+    }
+    /* Desktop logo's */
+    .desktop-logo {
+      display: block;
+      width: 80px;
+      height: 80px;
+      margin: 0 20px;
+    }
+    /* Mobile logo: standaard verborgen, later kleiner getoond via media query */
+    #mobile-logo {
+      display: none;
+    }
+    /* Chat container styling */
+    #chat-container {
+      flex: 1;
       background: #2c2c2c;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      display: none;
     }
     #chat-title {
       font-size: 24px;
@@ -184,6 +201,24 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
+    /* Mobile aanpassingen */
+    @media (max-width: 768px) {
+      #chat-wrapper {
+        flex-direction: column;
+      }
+      .desktop-logo {
+        display: none;
+      }
+      #mobile-logo {
+        display: block;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 10px;
+      }
+      #chat-container {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -199,13 +234,24 @@
     <button id="confirmPassword">Enter</button>
   </div>
 
-  <div id="chat-container">
-    <h2 id="chat-title"></h2>
-    <div id="chat"></div>
-    <div class="input-container">
-      <input type="text" id="message" placeholder="Typ een bericht...">
-      <button id="sendButton">Verstuur</button>
+  <!-- Mobile logo bovenaan -->
+  <img id="mobile-logo" src="https://via.placeholder.com/50?text=Chat" alt="Chat Logo">
+
+  <div id="chat-wrapper">
+    <!-- Desktop logo links -->
+    <img class="desktop-logo" src="https://via.placeholder.com/80?text=Chat" alt="Chat Logo">
+    
+    <div id="chat-container">
+      <h2 id="chat-title"></h2>
+      <div id="chat"></div>
+      <div class="input-container">
+        <input type="text" id="message" placeholder="Typ een bericht...">
+        <button id="sendButton">Verstuur</button>
+      </div>
     </div>
+    
+    <!-- Desktop logo rechts -->
+    <img class="desktop-logo" src="https://via.placeholder.com/80?text=Chat" alt="Chat Logo">
   </div>
 </body>
 </html>
