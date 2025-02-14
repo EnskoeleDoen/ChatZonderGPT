@@ -23,6 +23,7 @@
     let currentChat = "general";
     const correctPassword = "blablabla";
     let privateChatUnlocked = false;
+    let unsubscribe; // Variabele om de snapshot-luisteraar op te slaan
 
     function switchChat(chatName) {
       if (chatName === "private" && !privateChatUnlocked) {
@@ -67,8 +68,12 @@
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
+      // Stop vorige snapshot-luisteraar als die bestaat
+      if (unsubscribe) {
+        unsubscribe();
+      }
       const q = query(collection(db, currentChat), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
+      unsubscribe = onSnapshot(q, (snapshot) => {
         chatBox.innerHTML = "";
         snapshot.forEach((doc) => {
           const msg = document.createElement("p");
