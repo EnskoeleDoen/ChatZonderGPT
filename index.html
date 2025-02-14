@@ -8,6 +8,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+    // Firebase configuratie
     const firebaseConfig = {
       apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
       authDomain: "chat-zonder-gpt.firebaseapp.com",
@@ -21,46 +22,51 @@
     const db = getFirestore(app);
 
     let currentChat = "general";
-    const correctPassword = "blablabla";
-    let privateChatUnlocked = false;
+    const correctPassword = "bla";
+    let privateUnlocked = false;
     let unsubscribe = null;
 
+    // Wissel tussen chats
     function switchChat(chatName) {
-      // Als je naar privé wilt, maar nog niet geauthentiseerd bent:
-      if (chatName === "private" && !privateChatUnlocked) {
+      // Als je naar privé wilt maar niet geauthentiseerd bent,
+      // toon dan de wachtwoordinvoer en verberg de chat.
+      if (chatName === "private" && !privateUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
         document.getElementById("chat-container").style.display = "none";
         return;
       }
-      // Als je terug naar de algemene chat gaat, reset de privéstatus:
+      // Als je terug naar algemeen gaat, reset de privétoegang.
       if (chatName === "general") {
-        privateChatUnlocked = false;
+        privateUnlocked = false;
         document.getElementById("password-container").classList.add("hidden");
       }
-      // Zorg dat de wachtwoordinvoer verborgen is en leeg wordt gemaakt:
+      // Zorg dat de wachtwoord-container altijd wordt verborgen en leeggemaakt.
       document.getElementById("password-container").classList.add("hidden");
       document.getElementById("password").value = "";
-      
+
       currentChat = chatName;
-      document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
+      document.getElementById("chat-title").innerText = (chatName === "general") ? "Algemene Chat" : "Privé Chat";
       document.getElementById("chat-container").style.display = "block";
       loadChat();
     }
 
+    // Valideer wachtwoordinvoer
     function validatePassword() {
       const input = document.getElementById("password").value;
       if (input === correctPassword) {
-        privateChatUnlocked = true;
+        privateUnlocked = true;
+        document.getElementById("password-container").classList.add("hidden");
         switchChat("private");
       } else {
         alert("Fout wachtwoord!");
       }
     }
 
+    // Verzend een bericht naar de huidige chat
     async function sendMessage() {
       const messageInput = document.getElementById("message");
       const message = messageInput.value.trim();
-      if (message) {
+      if (message !== "") {
         await addDoc(collection(db, currentChat), {
           text: message,
           timestamp: serverTimestamp()
@@ -69,28 +75,40 @@
       }
     }
 
+    // Laad chatberichten via een snapshot-luisteraar
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
-      // Stop vorige snapshot-luisteraar als die bestaat
       if (unsubscribe) unsubscribe();
       const q = query(collection(db, currentChat), orderBy("timestamp"));
       unsubscribe = onSnapshot(q, (snapshot) => {
         chatBox.innerHTML = "";
         snapshot.forEach((doc) => {
-          const msg = document.createElement("p");
-          msg.textContent = doc.data().text;
-          chatBox.appendChild(msg);
+          const p = document.createElement("p");
+          p.textContent = doc.data().text;
+          chatBox.appendChild(p);
         });
       });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      // Verzend bericht bij Enter-toets in het berichtveld
       document.getElementById("message").addEventListener("keypress", function(event) {
         if (event.key === "Enter") sendMessage();
       });
       document.getElementById("sendButton").addEventListener("click", sendMessage);
-      document.getElementById("privateChatButton").addEventListener("click", validatePassword);
+
+      // Valideer wachtwoord bij Enter-toets in het wachtwoordveld
+      document.getElementById("password").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") validatePassword();
+      });
+      document.getElementById("confirmPassword").addEventListener("click", validatePassword);
+
+      // Knoppen voor wisselen tussen algemeen en privé
+      document.getElementById("generalButton").addEventListener("click", () => switchChat("general"));
+      document.getElementById("privateButton").addEventListener("click", () => switchChat("private"));
+
+      // Start in de algemene chat
       switchChat("general");
     });
   </script>
@@ -100,10 +118,12 @@
       background-color: #181818;
       color: white;
       text-align: center;
+      margin: 0;
+      padding: 20px;
     }
     #chat-container {
       max-width: 600px;
-      margin: auto;
+      margin: 20px auto;
       background: #2c2f36;
       padding: 20px;
       border-radius: 10px;
@@ -120,11 +140,12 @@
       display: flex;
       margin-top: 10px;
     }
-    input {
+    input[type="text"], input[type="password"] {
       flex: 1;
       padding: 10px;
       border: none;
       border-radius: 5px;
+      margin-right: 10px;
     }
     button {
       padding: 10px;
@@ -137,19 +158,24 @@
     .hidden {
       display: none;
     }
+    #buttons {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>Chat</h1>
-  <button onclick="switchChat('general')">Algemeen</button>
-  <button onclick="document.getElementById('password-container').classList.remove('hidden')">Privé</button>
-  
-  <div id="password-container" class="hidden">
-    <p>Voer wachtwoord in:</p>
-    <input type="password" id="password">
-    <button id="privateChatButton">Enter</button>
+  <div id="buttons">
+    <button id="generalButton">Algemeen</button>
+    <button id="privateButton">Privé</button>
   </div>
-  
+
+  <div id="password-container" class="hidden">
+    <p>Voer wachtwoord in voor privé chat:</p>
+    <input type="password" id="password" placeholder="Wachtwoord">
+    <button id="confirmPassword">Enter</button>
+  </div>
+
   <div id="chat-container">
     <h2 id="chat-title"></h2>
     <div id="chat"></div>
