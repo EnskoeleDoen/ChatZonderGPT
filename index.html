@@ -23,6 +23,11 @@
     let currentChat = "general";
     const correctPassword = "blablabla";
     let privateChatUnlocked = false;
+    let username = "";
+
+    function askUsername() {
+      username = prompt("Voer je naam in:") || "Anoniem";
+    }
 
     function switchChat(chatName) {
       if (chatName === "private" && !privateChatUnlocked) {
@@ -49,9 +54,7 @@
 
     async function sendMessage() {
       const messageInput = document.getElementById("message");
-      const usernameInput = document.getElementById("username");
       const message = messageInput.value.trim();
-      const username = usernameInput.value.trim() || "Anoniem";
       if (message) {
         await addDoc(collection(db, currentChat), {
           username: username,
@@ -71,13 +74,14 @@
         snapshot.forEach((doc) => {
           const data = doc.data();
           const msg = document.createElement("p");
-          msg.textContent = `${data.username}: ${data.text}`;
+          msg.innerHTML = `<span style='color: orange; font-weight: bold;'>${data.username}:</span> ${data.text}`;
           chatBox.appendChild(msg);
         });
       });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      askUsername();
       document.getElementById("message").addEventListener("keypress", function(event) {
         if (event.key === "Enter") {
           sendMessage();
@@ -147,9 +151,6 @@
   <div id="chat-container">
     <h2 id="chat-title"></h2>
     <div id="chat"></div>
-    <div class="input-container">
-      <input type="text" id="username" placeholder="Jouw naam">
-    </div>
     <div class="input-container">
       <input type="text" id="message" placeholder="Typ een bericht...">
       <button id="sendButton">Verstuur</button>
