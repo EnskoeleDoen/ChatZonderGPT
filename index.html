@@ -28,17 +28,16 @@
       localStorage.setItem("deviceId", myDeviceId);
     }
 
-    // Functie om per apparaat-ID een unieke stijl (kleine kleurvariatie) te genereren
+    // Functie om per apparaat-ID een opvallendere stijl te genereren
     function getStyleForDevice(deviceId) {
       let hash = 0;
       for (let i = 0; i < deviceId.length; i++) {
         hash = deviceId.charCodeAt(i) + ((hash << 5) - hash);
       }
       hash = Math.abs(hash);
-      // Gebruik de hash om een hue-waarde te berekenen (0-360)
       let hue = hash % 360;
-      // Geef een wit lettertype met een subtiele text-shadow in een kleur gebaseerd op de hue
-      return "color: #FFF; text-shadow: 0 0 5px hsla(" + hue + ", 100%, 50%, 0.8)";
+      // Gebruik de hash om een opvallende kleur en een sterke glow te maken
+      return "color: hsla(" + hue + ", 100%, 85%, 1); text-shadow: 0 0 10px hsla(" + hue + ", 100%, 50%, 1)";
     }
 
     let currentChat = "general";
@@ -106,7 +105,7 @@
           const p = document.createElement("p");
           p.textContent = data.text;
           if(data.device) {
-            // Stel de stijl in op basis van het apparaat-ID (klein kleurverschil)
+            // Stel de stijl in op basis van het apparaat-ID met opvallende kleuren
             p.style = getStyleForDevice(data.device);
           }
           chatBox.appendChild(p);
