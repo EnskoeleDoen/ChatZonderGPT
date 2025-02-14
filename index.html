@@ -21,8 +21,28 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Genereer een uniek apparaat-ID (wordt opgeslagen in localStorage)
+    let myDeviceId = localStorage.getItem("deviceId");
+    if (!myDeviceId) {
+      myDeviceId = "device-" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("deviceId", myDeviceId);
+    }
+
+    // Functie om per apparaat-ID een unieke stijl (kleine kleurvariatie) te genereren
+    function getStyleForDevice(deviceId) {
+      let hash = 0;
+      for (let i = 0; i < deviceId.length; i++) {
+        hash = deviceId.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      hash = Math.abs(hash);
+      // Gebruik de hash om een hue-waarde te berekenen (0-360)
+      let hue = hash % 360;
+      // Geef een wit lettertype met een subtiele text-shadow in een kleur gebaseerd op de hue
+      return "color: #FFF; text-shadow: 0 0 5px hsla(" + hue + ", 100%, 50%, 0.8)";
+    }
+
     let currentChat = "general";
-    const correctPassword = "seksopdekeukentafel";  // Wachtwoord aangepast
+    const correctPassword = "seksopdekeukentafel";  // Aangepast wachtwoord
     let privateUnlocked = false;
     let unsubscribe = null;
 
@@ -59,20 +79,21 @@
       }
     }
 
-    // Verzend bericht
+    // Verzend bericht inclusief het apparaat-ID
     async function sendMessage() {
       const messageInput = document.getElementById("message");
       const message = messageInput.value.trim();
       if (message !== "") {
         await addDoc(collection(db, currentChat), {
           text: message,
-          timestamp: serverTimestamp()
+          timestamp: serverTimestamp(),
+          device: myDeviceId  // sla het apparaat-ID op
         });
         messageInput.value = "";
       }
     }
 
-    // Laad chatberichten
+    // Laad chatberichten en pas per bericht een stijl toe op basis van het apparaat-ID
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
@@ -81,8 +102,13 @@
       unsubscribe = onSnapshot(q, (snapshot) => {
         chatBox.innerHTML = "";
         snapshot.forEach((doc) => {
+          const data = doc.data();
           const p = document.createElement("p");
-          p.textContent = doc.data().text;
+          p.textContent = data.text;
+          if(data.device) {
+            // Stel de stijl in op basis van het apparaat-ID (klein kleurverschil)
+            p.style = getStyleForDevice(data.device);
+          }
           chatBox.appendChild(p);
         });
       });
