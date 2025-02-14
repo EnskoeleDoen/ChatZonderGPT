@@ -28,29 +28,27 @@
 
     // Wissel tussen chats
     function switchChat(chatName) {
-      // Als je naar privé wilt maar niet geauthentiseerd bent,
-      // toon dan de wachtwoordinvoer en verberg de chat.
       if (chatName === "private" && !privateUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
         document.getElementById("chat-container").style.display = "none";
         return;
       }
-      // Als je terug naar algemeen gaat, reset de privétoegang.
       if (chatName === "general") {
         privateUnlocked = false;
         document.getElementById("password-container").classList.add("hidden");
       }
-      // Zorg dat de wachtwoord-container altijd wordt verborgen en leeggemaakt.
+      // Reset de wachtwoordinvoer
       document.getElementById("password-container").classList.add("hidden");
       document.getElementById("password").value = "";
-
+      
       currentChat = chatName;
+      // Geef in de titel duidelijk aan welke chat actief is.
       document.getElementById("chat-title").innerText = (chatName === "general") ? "Algemene Chat" : "Privé Chat";
       document.getElementById("chat-container").style.display = "block";
       loadChat();
     }
 
-    // Valideer wachtwoordinvoer
+    // Valideer wachtwoordinvoer voor privéchat
     function validatePassword() {
       const input = document.getElementById("password").value;
       if (input === correctPassword) {
@@ -92,19 +90,16 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Verzend bericht bij Enter-toets in het berichtveld
       document.getElementById("message").addEventListener("keypress", function(event) {
         if (event.key === "Enter") sendMessage();
       });
       document.getElementById("sendButton").addEventListener("click", sendMessage);
 
-      // Valideer wachtwoord bij Enter-toets in het wachtwoordveld
       document.getElementById("password").addEventListener("keypress", function(event) {
         if (event.key === "Enter") validatePassword();
       });
       document.getElementById("confirmPassword").addEventListener("click", validatePassword);
 
-      // Knoppen voor wisselen tussen algemeen en privé
       document.getElementById("generalButton").addEventListener("click", () => switchChat("general"));
       document.getElementById("privateButton").addEventListener("click", () => switchChat("private"));
 
@@ -114,20 +109,41 @@
   </script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #181818;
-      color: white;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e1e, #3e3e3e);
+      color: #f0f0f0;
       text-align: center;
       margin: 0;
       padding: 20px;
     }
+    #buttons {
+      margin-bottom: 20px;
+    }
+    #buttons button {
+      margin: 0 10px;
+      padding: 10px 15px;
+      background: #ff6347;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
     #chat-container {
       max-width: 600px;
       margin: 20px auto;
-      background: #2c2f36;
+      background: #2c2c2c;
       padding: 20px;
       border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
       display: none;
+    }
+    #chat-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 5px;
+      border-bottom: 2px solid #ff6347;
     }
     #chat {
       height: 400px;
@@ -135,6 +151,7 @@
       background: #222;
       padding: 10px;
       border-radius: 5px;
+      margin-bottom: 10px;
     }
     .input-container {
       display: flex;
@@ -148,18 +165,24 @@
       margin-right: 10px;
     }
     button {
-      padding: 10px;
+      padding: 10px 15px;
       background: #ff6347;
       border: none;
-      color: white;
+      color: #fff;
       cursor: pointer;
       border-radius: 5px;
+      font-weight: bold;
     }
     .hidden {
       display: none;
     }
-    #buttons {
-      margin-bottom: 20px;
+    #password-container {
+      max-width: 300px;
+      margin: 20px auto;
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
   </style>
 </head>
