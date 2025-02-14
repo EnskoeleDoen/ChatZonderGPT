@@ -32,7 +32,9 @@
       }
       if (chatName === "general") {
         privateChatUnlocked = false;
+        document.getElementById("password-container").classList.add("hidden");
       }
+      // Zorg dat de wachtwoord-container altijd verborgen is na een succesvolle switch
       document.getElementById("password-container").classList.add("hidden");
       currentChat = chatName;
       document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
