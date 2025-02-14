@@ -23,20 +23,23 @@
     let currentChat = "general";
     const correctPassword = "blablabla";
     let privateChatUnlocked = false;
-    let unsubscribe; // Variabele om de snapshot-luisteraar op te slaan
+    let unsubscribe; // snapshot listener
 
     function switchChat(chatName) {
+      // Als de gebruiker naar privé wil, maar nog niet geauthentiseerd is
       if (chatName === "private" && !privateChatUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
         document.getElementById("chat-container").style.display = "none";
         return;
       }
+      // Als je overschakelt naar de algemene chat, zorg er dan voor dat de privéchat wordt vergrendeld
       if (chatName === "general") {
         privateChatUnlocked = false;
-        document.getElementById("password-container").classList.add("hidden");
       }
-      // Zorg dat de wachtwoord-container altijd verborgen is na een succesvolle switch
+      // Verberg de wachtwoordinvoer en maak deze leeg
       document.getElementById("password-container").classList.add("hidden");
+      document.getElementById("password").value = "";
+      
       currentChat = chatName;
       document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
       document.getElementById("chat-container").style.display = "block";
@@ -68,10 +71,8 @@
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
-      // Stop vorige snapshot-luisteraar als die bestaat
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      // Stop vorige snapshot-luisteraar indien aanwezig
+      if (unsubscribe) unsubscribe();
       const q = query(collection(db, currentChat), orderBy("timestamp"));
       unsubscribe = onSnapshot(q, (snapshot) => {
         chatBox.innerHTML = "";
@@ -85,9 +86,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("message").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-          sendMessage();
-        }
+        if (event.key === "Enter") sendMessage();
       });
       document.getElementById("sendButton").addEventListener("click", sendMessage);
       document.getElementById("privateChatButton").addEventListener("click", validatePassword);
