@@ -8,6 +8,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+    // Firebase configuratie
     const firebaseConfig = {
       apiKey: "AIzaSyD5objwKA0WofNQ2xLx6lYrOZqH-DfQlMg",
       authDomain: "chat-zonder-gpt.firebaseapp.com",
@@ -21,43 +22,49 @@
     const db = getFirestore(app);
 
     let currentChat = "general";
-    const correctPassword = "blablabla";
-    let privateChatUnlocked = false;
-    let username = "";
+    const correctPassword = "bla";
+    let privateUnlocked = false;
+    let unsubscribe = null;
 
-    function askUsername() {
-      username = prompt("Voer je naam in:") || "Anoniem";
-    }
-
+    // Wissel tussen chats
     function switchChat(chatName) {
-      if (chatName === "private" && !privateChatUnlocked) {
+      if (chatName === "private" && !privateUnlocked) {
         document.getElementById("password-container").classList.remove("hidden");
-        document.getElementById("chat-container").style.display = "none";
+        document.getElementById("chat-wrapper").style.display = "none";
         return;
       }
+      if (chatName === "general") {
+        privateUnlocked = false;
+        document.getElementById("password-container").classList.add("hidden");
+      }
+      // Reset wachtwoordinvoer
       document.getElementById("password-container").classList.add("hidden");
+      document.getElementById("password").value = "";
+      
       currentChat = chatName;
-      document.getElementById("chat-title").innerText = chatName === "general" ? "Algemene Chat" : "Privé Chat";
-      document.getElementById("chat-container").style.display = "block";
+      document.getElementById("chat-title").innerText = (chatName === "general") ? "Algemene Chat" : "Privé Chat";
+      document.getElementById("chat-wrapper").style.display = "flex";
       loadChat();
     }
 
+    // Valideer wachtwoord
     function validatePassword() {
       const input = document.getElementById("password").value;
       if (input === correctPassword) {
-        privateChatUnlocked = true;
+        privateUnlocked = true;
+        document.getElementById("password-container").classList.add("hidden");
         switchChat("private");
       } else {
         alert("Fout wachtwoord!");
       }
     }
 
+    // Verzend bericht
     async function sendMessage() {
       const messageInput = document.getElementById("message");
       const message = messageInput.value.trim();
-      if (message) {
+      if (message !== "") {
         await addDoc(collection(db, currentChat), {
-          username: username,
           text: message,
           timestamp: serverTimestamp()
         });
@@ -65,47 +72,95 @@
       }
     }
 
+    // Laad chatberichten
     function loadChat() {
       const chatBox = document.getElementById("chat");
       chatBox.innerHTML = "";
+      if (unsubscribe) unsubscribe();
       const q = query(collection(db, currentChat), orderBy("timestamp"));
-      onSnapshot(q, (snapshot) => {
+      unsubscribe = onSnapshot(q, (snapshot) => {
         chatBox.innerHTML = "";
         snapshot.forEach((doc) => {
-          const data = doc.data();
-          const msg = document.createElement("p");
-          msg.innerHTML = `<span style='color: orange; font-weight: bold;'>${data.username}:</span> ${data.text}`;
-          chatBox.appendChild(msg);
+          const p = document.createElement("p");
+          p.textContent = doc.data().text;
+          chatBox.appendChild(p);
         });
       });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      askUsername();
       document.getElementById("message").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") {
-          sendMessage();
-        }
+        if (event.key === "Enter") sendMessage();
       });
       document.getElementById("sendButton").addEventListener("click", sendMessage);
-      document.getElementById("privateChatButton").addEventListener("click", validatePassword);
+
+      document.getElementById("password").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") validatePassword();
+      });
+      document.getElementById("confirmPassword").addEventListener("click", validatePassword);
+
+      document.getElementById("generalButton").addEventListener("click", () => switchChat("general"));
+      document.getElementById("privateButton").addEventListener("click", () => switchChat("private"));
+
+      // Start in de algemene chat
       switchChat("general");
     });
   </script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #181818;
-      color: white;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e1e, #3e3e3e);
+      color: #f0f0f0;
       text-align: center;
+      margin: 0;
+      padding: 20px;
     }
+    #buttons {
+      margin-bottom: 20px;
+    }
+    #buttons button {
+      margin: 0 10px;
+      padding: 10px 15px;
+      background: #ff6347;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    /* Wrapper voor de chat en desktop-logo's */
+    #chat-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    /* Desktop logo's */
+    .desktop-logo {
+      display: block;
+      width: 80px;
+      height: 80px;
+      margin: 0 20px;
+    }
+    /* Mobile logo: standaard verborgen, later kleiner getoond via media query */
+    #mobile-logo {
+      display: none;
+    }
+    /* Chat container styling */
     #chat-container {
-      max-width: 600px;
-      margin: auto;
-      background: #2c2f36;
+      flex: 1;
+      background: #2c2c2c;
       padding: 20px;
       border-radius: 10px;
-      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    #chat-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      padding: 5px;
+      border-bottom: 2px solid #ff6347;
     }
     #chat {
       height: 400px;
@@ -113,48 +168,90 @@
       background: #222;
       padding: 10px;
       border-radius: 5px;
+      margin-bottom: 10px;
     }
     .input-container {
       display: flex;
       margin-top: 10px;
     }
-    input {
+    input[type="text"], input[type="password"] {
       flex: 1;
       padding: 10px;
       border: none;
       border-radius: 5px;
+      margin-right: 10px;
     }
     button {
-      padding: 10px;
+      padding: 10px 15px;
       background: #ff6347;
       border: none;
-      color: white;
+      color: #fff;
       cursor: pointer;
       border-radius: 5px;
+      font-weight: bold;
     }
     .hidden {
       display: none;
+    }
+    #password-container {
+      max-width: 300px;
+      margin: 20px auto;
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    /* Mobile aanpassingen */
+    @media (max-width: 768px) {
+      #chat-wrapper {
+        flex-direction: column;
+      }
+      .desktop-logo {
+        display: none;
+      }
+      #mobile-logo {
+        display: block;
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 10px;
+      }
+      #chat-container {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Chat</h1>
-  <button onclick="switchChat('general')">Algemeen</button>
-  <button onclick="document.getElementById('password-container').classList.remove('hidden')">Privé</button>
-  
-  <div id="password-container" class="hidden">
-    <p>Voer wachtwoord in:</p>
-    <input type="password" id="password">
-    <button id="privateChatButton">Enter</button>
+  <div id="buttons">
+    <button id="generalButton">Algemeen</button>
+    <button id="privateButton">Privé</button>
   </div>
-  
-  <div id="chat-container">
-    <h2 id="chat-title"></h2>
-    <div id="chat"></div>
-    <div class="input-container">
-      <input type="text" id="message" placeholder="Typ een bericht...">
-      <button id="sendButton">Verstuur</button>
+
+  <div id="password-container" class="hidden">
+    <p>Voer wachtwoord in voor privé chat:</p>
+    <input type="password" id="password" placeholder="Wachtwoord">
+    <button id="confirmPassword">Enter</button>
+  </div>
+
+  <!-- Mobile logo bovenaan -->
+  <img id="mobile-logo" src="Images/chat.png" alt="Chat Logo">
+
+  <div id="chat-wrapper">
+    <!-- Desktop logo links -->
+    <img class="desktop-logo" src="Images/chat.png" alt="Chat Logo">
+    
+    <div id="chat-container">
+      <h2 id="chat-title"></h2>
+      <div id="chat"></div>
+      <div class="input-container">
+        <input type="text" id="message" placeholder="Typ een bericht...">
+        <button id="sendButton">Verstuur</button>
+      </div>
     </div>
+    
+    <!-- Desktop logo rechts -->
+    <img class="desktop-logo" src="Images/chat.png" alt="Chat Logo">
   </div>
 </body>
 </html>
